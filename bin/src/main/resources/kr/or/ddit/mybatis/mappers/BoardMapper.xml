@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.board.mapper.BoardMapper">
+	<sql id="freeBoardColumns">
+		BO_NO , BO_TITLE , BO_WRITER , BO_IP , BO_MAIL , BO_PASS ,
+		BO_CONTENT , BO_HIT , ATCH_FILE_ID , BO_DATE
+	</sql>
+	<insert id="insertBoard" parameterType="FreeBoardVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="boNo">
+			SELECT FREEBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO FREEBOARD (
+		<include refid="freeBoardColumns" />
+		) VALUES ( 
+			#{boNo, jdbcType=NUMERIC} 
+			, #{boTitle,jdbcType=VARCHAR} 
+			, #{boWriter,jdbcType=VARCHAR} 
+			, #{boIp,jdbcType=VARCHAR} 
+			, #{boMail,jdbcType=VARCHAR} 
+			, #{boPass,jdbcType=VARCHAR} 
+			, #{boContent,jdbcType=VARCHAR} 
+			, 0 
+			,#{atchFileId,jdbcType=NUMERIC}
+			<if test="boDate neq null">
+			, #{boDate,jdbcType=DATE}
+			</if>
+			<if test="boDate eq null">
+			, SYSDATE
+			</if>
+		)
+	</insert>
+
+	<resultMap type="FreeBoardVO" id="boardMap" autoMapping="true">
+		<id property="boNo" column="BO_NO" />
+		<result property="atchFileId" column="ATCH_FILE_ID" />
+		<association property="atchFile" column="ATCH_FILE_ID"
+			select="kr.or.ddit.atch.mapper.AtchFileMapper.selectAtchFileEnable" />
+	</resultMap>
+
+	<select id="selectBoard" resultMap="boardMap">
+		SELECT
+		<include refid="freeBoardColumns" />
+		FROM FREEBOARD 
+		WHERE BO_NO = #{boNo}
+	</select>
+
+	<update id="incrementHit">
+		UPDATE FREEBOARD 
+		SET 
+			BO_HIT = BO_HIT + 1 
+		WHERE BO_NO = #{boNo}
+	</update>
+
+	<!-- 검색 조건 -->
+	<sql id="searchFrag">
+		<where>
+			<if
+				test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+				<choose>
+					<when
+						test="simpleCondition.searchType eq 'title'">
+						INSTR(BO_TITLE, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when
+						test="simpleCondition.searchType eq 'writer'">
+						INSTR(BO_WRITER, #{simpleCondition.searchWord}) > 0
+					</when>
+					<when
+						test="simpleCondition.searchType eq 'content'">
+						INSTR(BO_CONTENT, #{simpleCondition.searchWord}) > 0
+					</when>
+					<otherwise>
+						INSTR(BO_TITLE, #{simpleCondition.searchWord}) > 0 
+						OR INSTR(BO_WRITER, #{simpleCondition.searchWord}) > 0 
+						OR INSTR(BO_CONTENT, #{simpleCondition.searchWord}) > 0
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectTotalRecord" resultType="int">
+		SELECT COUNT(BO_NO) FROM FREEBOARD
+		<include refid="searchFrag" />
+	</select>
+
+	<select id="selectBoardList" resultType="FreeBoardVO">
+		SELECT B.* 
+		FROM 
+		( 
+			SELECT ROWNUM RNUM, A.* 
+			FROM 
+			( 
+				SELECT
+					<include refid="freeBoardColumns" />
+				FROM FREEBOARD
+				<include refid="searchFrag" />
+				ORDER BY BO_NO DESC 
+			) A 
+		) B
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+
+	<select id="selectBoardListNonPaging" resultType="FreeBoardVO">
+		SELECT A.*, ROWNUM RNUM 
+		FROM 
+		( 
+			SELECT
+				<include refid="freeBoardColumns" />
+			FROM FREEBOARD ORDER BY BO_NO DESC 
+		) A
+	</select>
+
+	<update id="updateBoard">
+		UPDATE FREEBOARD 
+		SET 
+			BO_TITLE = #{boTitle,jdbcType=VARCHAR} 
+			, BO_MAIL = #{boMail,jdbcType=VARCHAR} 
+			, BO_CONTENT = #{boContent,jdbcType=VARCHAR}
+			<if test="atchFileId neq null">
+				, ATCH_FILE_ID = #{atchFileId,jdbcType=NUMERIC}
+			</if>
+		WHERE BO_NO =#{boNo}
+	</update>
+	<delete id="deleteBoard">
+		DELETE FROM FREEBOARD 
+		WHERE BO_NO = #{boNo}
+	</delete>
+</mapper>

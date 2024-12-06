@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.7.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<context:component-scan base-package="kr.or.ddit" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+	
+<!-- 	WAS 가 가진 DefaultServlet 으로 처리하던 정적 자원에 대한 요청을 -->
+<!-- 	대신 처리할 Simple Handler mapping 등록 -->
+	<mvc:resources location="/resources/" mapping="/resources/**" cache-period="0" />
+	
+	<!-- HandlerMapping, HandlerAdapter, validator를 자동 등록함. -->
+	<mvc:annotation-driven>
+		<mvc:argument-resolvers>
+			<bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver" />
+		</mvc:argument-resolvers>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<constructor-arg name="objectMapper" ref="objectMapper" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- 	JSON 변환시 사용할 ObjectMapper 설정 -->
+	<bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean" id="objectMapper">
+		<property name="featuresToDisable">
+			<array>
+				<util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS"/>
+			</array>
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" id="jsonView">
+		<property name="objectMapper" ref="objectMapper"></property>
+	</bean>
+	
+	<mvc:tiles-configurer>
+		<mvc:definitions location="/WEB-INF/tiles/*.xml"/>
+	</mvc:tiles-configurer>
+	
+	<mvc:view-resolvers>
+	<!-- accept request header 를 기준으로 response content 를 협상하는 전략 -->
+		<mvc:content-negotiation>
+			<mvc:default-views>
+				<ref bean="jsonView"/>
+			</mvc:default-views>
+		</mvc:content-negotiation>
+		<!-- 		lvn == bean id -->
+		<mvc:bean-name />
+		<!-- 		lvn == definition name -->
+		<mvc:tiles/>
+		<!-- 		lvn == prefix + lvn + suffix 경로에 해당하는 싱글 jsp 로 응답 전송 -->
+		<mvc:jsp prefix="/WEB-INF/views" suffix=".jsp"/>
+	</mvc:view-resolvers>
+	
+	<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" id="localeChangeInterceptor">
+		<property name="paramName" value="lang" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver"></bean>
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>		
+			<mvc:exclude-mapping path="/resources/**"/>	
+			<ref bean="localeChangeInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+</beans>
+
+
+
+
+
+
+
+

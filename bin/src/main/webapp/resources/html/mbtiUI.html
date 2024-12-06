@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="../NiceAdmin/assets/vendor/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+<form id="insert-form">
+	<table>
+		<tr>
+			<th>유형</th>
+			<td>
+				<input type="text" name="mtType" class="form-control" required />
+			</td>
+		</tr>
+		<tr>
+			<th>제목</th>
+			<td>
+				<input type="text" name="mtTitle" class="form-control" required />
+			</td>
+		</tr>
+		<tr>
+			<th>내용</th>
+			<td>
+				<textarea name="mtContent" class="form-control"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button type="submit">등록</button>
+			</td>
+		</tr>
+	</table>
+</form>
+<main class="container">
+	<select name="mbti" class="form-select">
+		<option value="estj">ESTJ 타이틀</option>
+	</select>
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+        <form id="update-form">
+	      <div class="modal-body">
+			<table>
+				<tr>
+					<th>유형</th>
+					<td>
+						<input type="text" name="mtType" class="form-control" required />
+					</td>
+				</tr>
+				<tr>
+					<th>제목</th>
+					<td>
+						<input type="text" name="mtTitle" class="form-control" required />
+					</td>
+				</tr>
+				<tr>
+					<th>내용</th>
+					<td>
+						<textarea name="mtContent" class="form-control"></textarea>
+					</td>
+				</tr>
+			</table>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+	        <button type="submit" class="btn btn-primary">수정</button>
+	        <button type="button" class="btn btn-danger" id="del-btn">삭제</button>
+	      </div>
+		</form>
+	    </div>
+	  </div>
+	</div>
+</main>
+<!-- 한건의 mbti 를 선택한 경우, -->
+<!-- modal 을 열고,  -->
+<!-- mbti 유형을 수정할 수 있는 UI 제공. -->
+<script type="text/javascript" src="../NiceAdmin/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/app/mbti/mbtiUI.js"></script>
+</body>
+</html>

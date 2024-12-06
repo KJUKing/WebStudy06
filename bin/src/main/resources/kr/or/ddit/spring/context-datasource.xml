@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+<!-- 	 데이터베이스 연결을 위한 data source 등록 -->
+	<util:properties location="classpath:kr/or/ddit/db/DBInfo.properties" id="dbInfo" />
+	
+<!-- 	<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource"> -->
+<!-- 		<property name="driverClassName" value="#{dbInfo.driverClassName}" /> -->
+<!-- 		<property name="url" value="#{dbInfo.url}" /> -->
+<!-- 		<property name="username" value="#{dbInfo.user}" /> -->
+<!-- 		<property name="password" value="#{dbInfo.password}" /> -->
+<!-- 	</bean>	 -->
+
+	<bean class="com.zaxxer.hikari.HikariConfig" id="hikariConfig">
+		<property name="driverClassName" value="#{dbInfo.driverClassName}"/>
+		<property name="jdbcUrl" value="#{dbInfo.url}"/>
+		<property name="username" value="#{dbInfo.user}"/>
+		<property name="password" value="#{dbInfo.password}"/>
+		
+		<property name="connectionTestQuery" value="#{dbInfo.testQuery}"/>
+		<property name="minimumIdle" value="#{dbInfo.minimulIdle}"/>
+		<property name="maximumPoolSize" value="#{dbInfo.maximulSize}"/>
+		<property name="connectionTimeout" value="#{dbInfo.maxWait}"/>
+	</bean>
+	
+	<bean class="com.zaxxer.hikari.HikariDataSource" id="dataSource">
+		<constructor-arg ref="hikariConfig"/>
+	</bean>
+</beans>
